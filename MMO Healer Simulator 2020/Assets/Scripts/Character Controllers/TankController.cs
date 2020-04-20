@@ -18,12 +18,15 @@ public class TankController : MonoBehaviour {
 
     private Sprite tankSprite;
 
+    private Animator animator;
+
     void Start() {
         // set target to enemy
         target = FindObjectOfType<EnemyController>();
 
         // other
-        tankSprite = gameObject.GetComponent<SpriteRenderer>().sprite;
+        tankSprite = GetComponent<SpriteRenderer>().sprite;
+        animator = GetComponent<Animator>();
 
         nextAttack = nextTaunt = FindObjectOfType<GameController>().timeBeforeFirstAttack;
 
@@ -65,6 +68,7 @@ public class TankController : MonoBehaviour {
     }
 
     public void Attack(int amount) {
+        animator.Play("Tank_Attack");
         target.Damage(amount);
     }
 
@@ -73,18 +77,19 @@ public class TankController : MonoBehaviour {
     }
 
     public void Taunt() {
+        animator.Play("Tank_Attack");
         target.isTaunted = true;
     }
 
     private void Dead() {
         // hide & stop everything
-        gameObject.GetComponent<SpriteRenderer>().sprite = null;
+        GetComponent<SpriteRenderer>().sprite = null;
         target.targets.Remove(gameObject);
     }
 
     public void Revive() {
         isDead = false;
-        gameObject.GetComponent<SpriteRenderer>().sprite = tankSprite;
+        GetComponent<SpriteRenderer>().sprite = tankSprite;
         healthSystem.Heal(stats.maxHealth);
         target.targets.Add(gameObject);
     }

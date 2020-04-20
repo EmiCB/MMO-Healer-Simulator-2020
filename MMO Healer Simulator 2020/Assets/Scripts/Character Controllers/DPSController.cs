@@ -19,6 +19,8 @@ public class DPSController : MonoBehaviour {
 
     private Sprite dpsSprite;
 
+    private Animator animator;
+
     void Start() {
         // set target to enemy
         target = FindObjectOfType<EnemyController>();
@@ -28,6 +30,7 @@ public class DPSController : MonoBehaviour {
         else xVal = 2.0f;
 
         dpsSprite = GetComponent<SpriteRenderer>().sprite;
+        animator = GetComponent<Animator>();
 
         nextAttack = FindObjectOfType<GameController>().timeBeforeFirstAttack;
 
@@ -63,6 +66,7 @@ public class DPSController : MonoBehaviour {
     }
 
     public void Attack(int amount) {
+        animator.Play("DPS_Attack");
         target.Damage(amount);
     }
 

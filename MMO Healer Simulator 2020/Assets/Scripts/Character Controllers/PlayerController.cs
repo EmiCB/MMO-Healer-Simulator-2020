@@ -28,9 +28,12 @@ public class PlayerController : MonoBehaviour {
     private DPSController dps;
     private EnemyController enemy;
 
+    private Animator animator;
+
     void Start() {
         // set references
         gc = FindObjectOfType<GameController>();
+        animator = GetComponent<Animator>();
 
         // set initial target to self
         targetIndex = 0;
@@ -94,6 +97,7 @@ public class PlayerController : MonoBehaviour {
     private void BasicAttack(int amount) {
         // check if valid target
         if (enemy != null) {
+            animator.Play("Healer_Cast");
             target.GetComponent<EnemyController>().Damage(amount);
             manaSystem.Restore(stats.basicAttackManaRestore);
             nextCast1 = Time.time + stats.timeBetweenAttacks;
@@ -107,16 +111,19 @@ public class PlayerController : MonoBehaviour {
         if(manaSystem.GetMana() >= stats.spell2Cost) {
             // check if valid target
             if (tank != null && tank.CheckHP() < tank.stats.maxHealth && !tank.isDead) {
+                animator.Play("Healer_Cast");
                 tank.Heal(amount);
                 manaSystem.Use(stats.spell2Cost);
                 nextCast2 = Time.time + stats.spell2CD;
             }
             else if (dps != null && dps.CheckHP() < dps.stats.maxHealth && !dps.isDead) {
+                animator.Play("Healer_Cast");
                 dps.Heal(amount);
                 manaSystem.Use(stats.spell2Cost);
                 nextCast2 = Time.time + stats.spell2CD;
             }
             else if (target.GetComponent<PlayerController>() != null && healthSystem.GetHealth() < stats.maxHealth) {
+                animator.Play("Healer_Cast");
                 healthSystem.Heal(amount);
                 manaSystem.Use(stats.spell2Cost);
                 nextCast2 = Time.time + stats.spell2CD;
@@ -133,11 +140,13 @@ public class PlayerController : MonoBehaviour {
     private void Ultimate() {
         if (manaSystem.GetMana() >= stats.spell3Cost) {
             if (tank != null && tank.isDead) {
+                animator.Play("Healer_Cast");
                 tank.Revive();
                 manaSystem.Use(stats.spell3Cost);
                 nextCast3 = Time.time + stats.spell3CD;
             }
             else if (dps != null && dps.isDead) {
+                animator.Play("Healer_Cast");
                 dps.Revive();
                 manaSystem.Use(stats.spell3Cost);
                 nextCast3 = Time.time + stats.spell3CD;
