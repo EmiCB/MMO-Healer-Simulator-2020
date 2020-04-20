@@ -14,9 +14,18 @@ public class TankController : MonoBehaviour {
     private float nextAttack;
     private float nextTaunt;
 
+    public bool isDead;
+
+    private Sprite tankSprite;
+
     void Start() {
         // set target to enemy
         target = FindObjectOfType<EnemyController>();
+
+        // other
+        tankSprite = gameObject.GetComponent<SpriteRenderer>().sprite;
+
+        nextAttack = nextTaunt = FindObjectOfType<GameController>().timeBeforeFirstAttack;
 
         // stats setup
         // health
@@ -28,14 +37,22 @@ public class TankController : MonoBehaviour {
     }
 
     void Update() {
-        if (Time.time > nextAttack) {
-            nextAttack = Time.time + stats.timeBetweenAttacks;
-            if (!target.isTaunted && Time.time > nextTaunt) {
-                nextTaunt = Time.time + stats.spell2CD;
-                Taunt();
-                Debug.Log("Enemy is taunted!");
+        // check life status
+        if (healthSystem.GetHealth() <= 0) isDead = true;
+        else isDead = false;
+
+        // run appropriately
+        if (isDead) Dead();
+        else {
+            if (Time.time > nextAttack) {
+                nextAttack = Time.time + stats.timeBetweenAttacks;
+                if (!target.isTaunted && Time.time > nextTaunt) {
+                    nextTaunt = Time.time + stats.spell2CD;
+                    Taunt();
+                    //Debug.Log("Enemy is taunted!");
+                }
+                else Attack(stats.basicAttackDamage);
             }
-            else Attack(stats.basicAttackDamage);
         }
     }
 
@@ -57,5 +74,18 @@ public class TankController : MonoBehaviour {
 
     public void Taunt() {
         target.isTaunted = true;
+    }
+
+    private void Dead() {
+        // hide & stop everything
+        gameObject.GetComponent<SpriteRenderer>().sprite = null;
+        target.targets.Remove(gameObject);
+    }
+
+    public void Revive() {
+        isDead = false;
+        gameObject.GetComponent<SpriteRenderer>().sprite = tankSprite;
+        healthSystem.Heal(stats.maxHealth);
+        target.targets.Add(gameObject);
     }
 }

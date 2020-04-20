@@ -12,6 +12,7 @@ public class EnemyController : MonoBehaviour {
     private int appearanceIndex;
 
     private GameObject target;
+    public List<GameObject> targets;
 
     public Transform healthBarPrefab;
 
@@ -21,6 +22,7 @@ public class EnemyController : MonoBehaviour {
     private float nextTimeFree;
 
     private int targetPicker;
+    private int statPicker;
 
     public bool isTaunted;
 
@@ -30,10 +32,12 @@ public class EnemyController : MonoBehaviour {
 
         //other
         stats = statTypes[0];
-        nextAttack = 2;
+        nextAttack = gc.timeBeforeFirstAttack;
 
-        // set init target to tank for now
-        target = FindObjectOfType<TankController>().gameObject;
+        // target list
+        for (int i = 0; i < gc.allTargets.Length - 1; i++) {
+            targets.Add(gc.allTargets[i]);
+        }
 
         // stats setup
         // health
@@ -52,7 +56,7 @@ public class EnemyController : MonoBehaviour {
             else target = FindObjectOfType<TankController>().gameObject;
 
             Attack(target, stats.basicAttackDamage);
-            Debug.Log("Attacked " + target + "for " + stats.basicAttackDamage + " damage.");
+            //Debug.Log("Attacked " + target + "for " + stats.basicAttackDamage + " damage.");
         }
 
         if (isTaunted) {
@@ -83,8 +87,8 @@ public class EnemyController : MonoBehaviour {
     }
 
     private GameObject TargetPicker() {
-        targetPicker = Random.Range(0, gc.targets.Length - 1);
-        target = gc.targets[targetPicker];
+        targetPicker = Random.Range(0, targets.Count);
+        target = targets[targetPicker];
         return target;
     }
 
@@ -95,8 +99,9 @@ public class EnemyController : MonoBehaviour {
 
         // make effect later
 
-        // random SO
-        stats = statTypes[0];
+        // random SO & reset
+        statPicker = Random.Range(0, statTypes.Length);
+        stats = statTypes[statPicker];
         healthSystem.Heal(stats.maxHealth);
 
         // random swap sprites

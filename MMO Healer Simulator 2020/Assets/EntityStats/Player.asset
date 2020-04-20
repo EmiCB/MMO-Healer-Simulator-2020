@@ -20,5 +20,5 @@ MonoBehaviour:
   spell2CD: 2
   spell2Cost: 10
   basicHealAmount: 10
-  spell3CD: 0
-  spell3Cost: 0
+  spell3CD: 60
+  spell3Cost: 100

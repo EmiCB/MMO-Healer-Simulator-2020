@@ -15,12 +15,21 @@ public class DPSController : MonoBehaviour {
 
     private float xVal;
 
+    public bool isDead;
+
+    private Sprite dpsSprite;
+
     void Start() {
         // set target to enemy
         target = FindObjectOfType<EnemyController>();
 
+        // other
         if (name == "DPS 1") xVal = -2.0f;
         else xVal = 2.0f;
+
+        dpsSprite = GetComponent<SpriteRenderer>().sprite;
+
+        nextAttack = FindObjectOfType<GameController>().timeBeforeFirstAttack;
 
         // stats setup
         // health
@@ -32,10 +41,17 @@ public class DPSController : MonoBehaviour {
     }
 
     void Update() {
-        if (Time.time > nextAttack) {
-            nextAttack = Time.time + stats.timeBetweenAttacks;
-            Attack(stats.basicAttackDamage);
+        if (healthSystem.GetHealth() <= 0) isDead = true;
+        else isDead = false;
+
+        if (isDead) Dead();
+        else {
+            if (Time.time > nextAttack) {
+                nextAttack = Time.time + stats.timeBetweenAttacks;
+                Attack(stats.basicAttackDamage);
+            }
         }
+        
     }
 
     public void Damage(int amount) {
@@ -52,5 +68,18 @@ public class DPSController : MonoBehaviour {
 
     public int CheckHP() {
         return healthSystem.GetHealth();
+    }
+
+    private void Dead() {
+        // hide & stop everything
+        gameObject.GetComponent<SpriteRenderer>().sprite = null;
+        target.targets.Remove(gameObject);
+    }
+
+    public void Revive() {
+        isDead = false;
+        gameObject.GetComponent<SpriteRenderer>().sprite = dpsSprite;
+        healthSystem.Heal(stats.maxHealth);
+        target.targets.Add(gameObject);
     }
 }

@@ -24,13 +24,17 @@ public class PlayerController : MonoBehaviour {
     public float nextCast2;
     public float nextCast3;
 
+    private TankController tank;
+    private DPSController dps;
+    private EnemyController enemy;
+
     void Start() {
         // set references
         gc = FindObjectOfType<GameController>();
 
         // set initial target to self
         targetIndex = 0;
-        target = gc.targets[targetIndex];
+        target = gc.allTargets[targetIndex];
         targetIndicator = GameObject.Find("TargetIndicator").transform; //TODO: CHANGE METHOD LATER
 
         targetIndicator.position = target.transform.position;
@@ -62,7 +66,6 @@ public class PlayerController : MonoBehaviour {
             BasicHeal(stats.basicHealAmount);
         }
         if (Input.GetKeyDown(KeyCode.Alpha3) && Time.time > nextCast3) {
-            nextCast3 = Time.time + stats.spell3CD;
             Ultimate();
         }
     }
@@ -73,58 +76,79 @@ public class PlayerController : MonoBehaviour {
             // check & set target index
             if (targetIndex < 4) targetIndex++;
             else targetIndex = 0;
+            target = gc.allTargets[targetIndex];
 
-            target = gc.targets[targetIndex];
+            // set controller statuses
+            tank = target.GetComponent<TankController>();
+            dps = target.GetComponent<DPSController>();
+            enemy = target.GetComponent<EnemyController>();
 
+            // move indicator
             targetIndicator.position = target.transform.position;
             targetIndicator.localScale = target.transform.localScale + new Vector3(0.3f, 0.3f, 0);
-
-            Debug.Log(target);
         }
     }
 
     // abilities
     // basic attack
     private void BasicAttack(int amount) {
-        Debug.Log("Basic Attack");
-
         // check if valid target
-        if (target.GetComponent<EnemyController>() != null) {
+        if (enemy != null) {
             target.GetComponent<EnemyController>().Damage(amount);
             manaSystem.Restore(stats.basicAttackManaRestore);
             nextCast1 = Time.time + stats.timeBetweenAttacks;
         }
         else {
-            Debug.Log("Stop trying to kill your team!");
+            Debug.Log("You cannot attack the current target.");
         }
     }
     // basic heal
     private void BasicHeal(int amount) {
-        Debug.Log("Basic Heal");
-
-        // check if valid target
-        if (target.GetComponent<TankController>() != null && target.GetComponent<TankController>().CheckHP() < target.GetComponent<TankController>().stats.maxHealth) {
-            target.GetComponent<TankController>().Heal(amount);
-            manaSystem.Use(stats.spell2Cost);
-            nextCast2 = Time.time + stats.spell2CD;
-        }
-        else if (target.GetComponent<DPSController>() != null && target.GetComponent<DPSController>().CheckHP() < target.GetComponent<DPSController>().stats.maxHealth) { 
-            target.GetComponent<DPSController>().Heal(amount);
-            manaSystem.Use(stats.spell2Cost);
-            nextCast2 = Time.time + stats.spell2CD;
-        }
-        else if (target.GetComponent<PlayerController>() != null && healthSystem.GetHealth() < stats.maxHealth) {
-            healthSystem.Heal(amount);
-            manaSystem.Use(stats.spell2Cost);
-            nextCast2 = Time.time + stats.spell2CD;
+        if(manaSystem.GetMana() >= stats.spell2Cost) {
+            // check if valid target
+            if (tank != null && tank.CheckHP() < tank.stats.maxHealth && !tank.isDead) {
+                tank.Heal(amount);
+                manaSystem.Use(stats.spell2Cost);
+                nextCast2 = Time.time + stats.spell2CD;
+            }
+            else if (dps != null && dps.CheckHP() < dps.stats.maxHealth && !dps.isDead) {
+                dps.Heal(amount);
+                manaSystem.Use(stats.spell2Cost);
+                nextCast2 = Time.time + stats.spell2CD;
+            }
+            else if (target.GetComponent<PlayerController>() != null && healthSystem.GetHealth() < stats.maxHealth) {
+                healthSystem.Heal(amount);
+                manaSystem.Use(stats.spell2Cost);
+                nextCast2 = Time.time + stats.spell2CD;
+            }
+            else {
+                Debug.Log("You cannot heal the current target.");
+            }
         }
         else {
-            Debug.Log("NO!");
+            Debug.Log("Not enought mana!");
         }
     }
     // team heal, cleanse, small heal over time OR revive
     private void Ultimate() {
-        Debug.Log("Ultimate");
+        if (manaSystem.GetMana() >= stats.spell3Cost) {
+            if (tank != null && tank.isDead) {
+                tank.Revive();
+                manaSystem.Use(stats.spell3Cost);
+                nextCast3 = Time.time + stats.spell3CD;
+            }
+            else if (dps != null && dps.isDead) {
+                dps.Revive();
+                manaSystem.Use(stats.spell3Cost);
+                nextCast3 = Time.time + stats.spell3CD;
+            }
+            else {
+                Debug.Log("You cannot revive the current target.");
+            }
+        }
+        else {
+            Debug.Log("Not enought mana!");
+        }
     }
 
     public void Damage(int amount) {
@@ -145,5 +169,9 @@ public class PlayerController : MonoBehaviour {
                 break;
         }
         return cd;
+    }
+
+    public float CheckHP() {
+        return healthSystem.GetHealth();
     }
 }
