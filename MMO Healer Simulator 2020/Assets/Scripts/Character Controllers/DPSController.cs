@@ -76,13 +76,13 @@ public class DPSController : MonoBehaviour {
 
     private void Dead() {
         // hide & stop everything
-        gameObject.GetComponent<SpriteRenderer>().sprite = null;
+        animator.Play("DPS_Dead");
         target.targets.Remove(gameObject);
     }
 
     public void Revive() {
         isDead = false;
-        gameObject.GetComponent<SpriteRenderer>().sprite = dpsSprite;
+        animator.Play("DPS_Idle");
         healthSystem.Heal(stats.maxHealth);
         target.targets.Add(gameObject);
     }

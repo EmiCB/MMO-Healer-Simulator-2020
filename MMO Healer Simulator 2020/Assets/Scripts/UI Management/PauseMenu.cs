@@ -14,6 +14,12 @@ public class PauseMenu : MonoBehaviour {
     public DPSController dps1;
     public DPSController dps2;
 
+    private AudioSource music;
+
+    private void Start() {
+        music = FindObjectOfType<AudioSource>();
+    }
+
     void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             if (isPaused) Resume();
@@ -25,12 +31,14 @@ public class PauseMenu : MonoBehaviour {
 
     public void Resume() {
         pauseMenu.SetActive(false);
+        music.Play();
         Time.timeScale = 1.0f;
         isPaused = false;
     }
 
     void Pause() {
         pauseMenu.SetActive(true);
+        music.Pause();
         Time.timeScale = 0.0f;
         isPaused = true;
     }
@@ -46,10 +54,12 @@ public class PauseMenu : MonoBehaviour {
 
     void GameOver() {
         gameOverMenu.SetActive(true);
+        music.Pause();
         Time.timeScale = 0.0f;
     }
 
     public void Retry() {
+        music.Play();
         Time.timeScale = 1.0f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }

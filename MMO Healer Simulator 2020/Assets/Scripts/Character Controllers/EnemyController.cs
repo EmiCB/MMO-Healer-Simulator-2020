@@ -8,6 +8,7 @@ public class EnemyController : MonoBehaviour {
     public EntityStats[] statTypes;
     public EntityStats stats;
 
+    public Sprite currentSprite;
     public Sprite[] appearances;
     private int appearanceIndex;
 
@@ -32,7 +33,7 @@ public class EnemyController : MonoBehaviour {
     void Start() {
         // set references
         gc = FindObjectOfType<GameController>();
-        animator = FindObjectOfType<Animator>();
+        animator = GetComponent<Animator>();
         cameraAnimator = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Animator>();
 
         //other
@@ -54,6 +55,8 @@ public class EnemyController : MonoBehaviour {
     }
 
     void Update() {
+        currentSprite = GetComponent<SpriteRenderer>().sprite;
+
         if (Time.time > nextAttack) {
             nextAttack = Time.time + stats.timeBetweenAttacks;
 
@@ -81,10 +84,10 @@ public class EnemyController : MonoBehaviour {
 
     private void Attack(GameObject target, int amount) {
         // check animation, could be implemented better
-        if (GetComponent<SpriteRenderer>().sprite == appearances[0]) animator.Play("Slime_Attack");
-        else if (GetComponent<SpriteRenderer>().sprite == appearances[1]) animator.Play("Minotaur_Attack");
-        else if (GetComponent<SpriteRenderer>().sprite == appearances[2]) animator.Play("Mask_Attack");
-        else if (GetComponent<SpriteRenderer>().sprite == appearances[3]) animator.Play("Eyeball_Attack");
+        if (currentSprite == appearances[0]) animator.Play("Slime_Attack");
+        else if (currentSprite == appearances[1]) animator.Play("Minotaur_Attack");
+        else if (currentSprite == appearances[2]) animator.Play("Mask_Attack");
+        else if (currentSprite == appearances[3]) animator.Play("Eyeball_Attack");
 
         // check target
         if (target.GetComponent<TankController>() != null) {
@@ -106,11 +109,10 @@ public class EnemyController : MonoBehaviour {
 
     private void Dead() {
         // hide & stop everything
-        GetComponent<SpriteRenderer>().sprite = null;
         stats = null;
-        animator.StopPlayback();
 
         // make effect later
+        animator.Play("Dead");
         cameraAnimator.Play("ScreenShake");
 
         // random SO & reset
@@ -120,15 +122,16 @@ public class EnemyController : MonoBehaviour {
 
         // random swap sprites
         appearanceIndex = Random.Range(0, appearances.Length);
-        GetComponent<SpriteRenderer>().sprite = appearances[appearanceIndex];
+        currentSprite = appearances[appearanceIndex];
 
         // check animation, could be implemented better
-        if (GetComponent<SpriteRenderer>().sprite == appearances[0]) animator.Play("Slime_Idle");
-        else if (GetComponent<SpriteRenderer>().sprite == appearances[1]) animator.Play("Minotaur_Idle");
-        else if (GetComponent<SpriteRenderer>().sprite == appearances[2]) animator.Play("Mask_Idle");
-        else if (GetComponent<SpriteRenderer>().sprite == appearances[3]) animator.Play("Eyeball_Idle");
-
-        Debug.Log(GetComponent<SpriteRenderer>().sprite);
+        
+        if (currentSprite == appearances[0]) animator.Play("Slime_Idle");
+        else if (currentSprite == appearances[1]) animator.Play("Minotaur_Idle");
+        else if (currentSprite == appearances[2]) animator.Play("Mask_Idle");
+        else if (currentSprite == appearances[3]) animator.Play("Eyeball_Idle");
+        
+        //Debug.Log(currentSprite);
 
         // add to score
         gc.killCount++;

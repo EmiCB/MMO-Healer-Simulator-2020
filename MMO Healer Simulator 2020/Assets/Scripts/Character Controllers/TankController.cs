@@ -83,13 +83,13 @@ public class TankController : MonoBehaviour {
 
     private void Dead() {
         // hide & stop everything
-        GetComponent<SpriteRenderer>().sprite = null;
+        animator.Play("Tank_Dead");
         target.targets.Remove(gameObject);
     }
 
     public void Revive() {
         isDead = false;
-        GetComponent<SpriteRenderer>().sprite = tankSprite;
+        animator.Play("Tank_Idle");
         healthSystem.Heal(stats.maxHealth);
         target.targets.Add(gameObject);
     }

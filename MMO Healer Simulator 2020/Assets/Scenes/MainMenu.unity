@@ -344,12 +344,13 @@ MonoBehaviour:
   m_Text: 'TAB - cycle through targets
 
     1 - attacks selected (hostile) target,
-    restores mana (which is not anturally regenerated)
+    restores mana (which is not anturally regenerated) [1 damage, 1 sec cd, +10 mana]
 
-    2 - heals selected (friendly)
-    target
+    2
+    - heals selected (friendly) target [+10 hp, 2 sec cd, -10 mana]
 
-    3 - revives selected (freindly & dead) target
+    3 - revives
+    selected (freindly & dead) target [100 sec cd, -all mana]
 
     ESC - pause game
 
